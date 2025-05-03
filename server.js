@@ -17,14 +17,27 @@ app.use(cors({ origin: 'https://patricks-photogallery-frontend.onrender.com' }))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Image Uploads Endpoint
-const db = new sqlite3.Database('./database/images.db');
+// Initialize SQLite database with persistent connection
+const db = new sqlite3.Database('./database/images.db', (err) => {
+    if (err) {
+        console.error('Error opening database:', err.message);
+    } else {
+        console.log('Connected to the SQLite database.');
+    }
+});
 
 // Create table if it doesn't exist
 db.run(`CREATE TABLE IF NOT EXISTS images (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     url TEXT NOT NULL
-)`);
+)`, (err) => {
+    if (err) {
+        console.error('Error creating table:', err.message);
+    } else {
+        console.log('Images table is ready.');
+    }
+});
 
 // User Login Logic
 app.post('/login', (req, res) => {
@@ -204,7 +217,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-
 
 // Start the server
 const PORT = process.env.PORT || 3000;
