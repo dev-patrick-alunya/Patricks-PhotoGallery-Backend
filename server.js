@@ -16,9 +16,12 @@ app.use(cors({ origin: 'https://patricks-photogallery-frontend.onrender.com' }))
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Image Uploads Endpoint
+
 // Initialize SQLite database with persistent connection
-const db = new sqlite3.Database('./database/images.db', (err) => {
+const dbPath = './database/images.db';
+const dbExists = fs.existsSync(dbPath);
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {
@@ -26,17 +29,34 @@ const db = new sqlite3.Database('./database/images.db', (err) => {
     }
 });
 
-// Create table if it doesn't exist
-db.run(`CREATE TABLE IF NOT EXISTS images (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    filename TEXT NOT NULL,
-    url TEXT NOT NULL
-)`, (err) => {
-    if (err) {
-        console.error('Error creating table:', err.message);
-    } else {
-        console.log('Images table is ready.');
-    }
+// Create table only if the database is newly created
+if (!dbExists) {
+    db.run(`CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filename TEXT NOT NULL,
+        url TEXT NOT NULL
+    )`, (err) => {
+        if (err) {
+            console.error('Error creating table:', err.message);
+        } else {
+            console.log('Images table is ready.');
+        }
+    });
+} else {
+    console.log('Database already exists. Skipping table creation.');
+}
+
+// Gracefully close the database connection on application shutdown
+process.on('SIGINT', () => {
+    console.log('Closing database connection...');
+    db.close((err) => {
+        if (err) {
+            console.error('Error closing database:', err.message);
+        } else {
+            console.log('Database connection closed.');
+        }
+        process.exit(0);
+    });
 });
 
 // User Login Logic
