@@ -98,7 +98,7 @@ app.post('/upload', upload.array('files'), (req, res) => {
         }
 
         const uploadedFiles = req.files.map(file => {
-            const url = `http://localhost:3000/uploads/${file.filename}`;
+            const url = `https://patricks-photogallery-backend.onrender.com/uploads/${file.filename}`;
             db.run(`INSERT INTO images (filename, url) VALUES (?, ?)`, [file.filename, url], (err) => {
                 if (err) {
                     console.error(err);
