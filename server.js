@@ -25,7 +25,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // Initialize SQLite database with persistent connection
-const dbPath = './database/images.db';
+const dbDir = path.join(__dirname, 'database');
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true }); // Create the directory if it doesn't exist
+}
+
+const dbPath = path.join(dbDir, 'images.db');
 const dbExists = fs.existsSync(dbPath);
 
 const db = new sqlite3.Database(dbPath, (err) => {
