@@ -11,7 +11,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const cors = require('cors');
-app.use(cors({ origin: 'https://patricks-photogallery-frontend.onrender.com' }));
+app.use(cors(
+    { 
+        origin: 
+        'https://patricks-photogallery-frontend.onrender.com' ,
+        methods: ['GET', 'POST', 'DELETE'],
+        allowedHeaders: ['Content-Type'],
+        credentials: true,
+    }));
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
